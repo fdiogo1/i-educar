@@ -15,6 +15,8 @@ class clsPmieducarTurma extends Model
     const TURNO_INTEGRAL = 4;
 
     public $cod_turma;
+    
+    public $mensagem;
 
     public $ref_usuario_exc;
 
@@ -231,18 +233,6 @@ class clsPmieducarTurma extends Model
         }
     }
 
-    <?php
-
-class clsPmieducarTurma
-{
-    public $hora_inicial;
-    public $hora_final;
-    public $hora_inicio_intervalo;
-    public $hora_fim_intervalo;
-    
-    public $mensagem;
-
-    // ... (Outras propriedades da classe legado omitidas, se houver) ...
 
     /**
      * Valida a consistência dos horários de aula e intervalo.
@@ -546,7 +536,6 @@ class clsPmieducarTurma
 
         return false;
     }
-}
 
     /**
      * Edita os dados de um registro
