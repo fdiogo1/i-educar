@@ -231,13 +231,69 @@ class clsPmieducarTurma extends Model
         }
     }
 
+    <?php
+
+class clsPmieducarTurma
+{
+    public $hora_inicial;
+    public $hora_final;
+    public $hora_inicio_intervalo;
+    public $hora_fim_intervalo;
+    
+    public $mensagem;
+
+    // ... (Outras propriedades da classe legado omitidas, se houver) ...
+
     /**
-     * Cria um novo registro
-     *
+     * Valida a consistência dos horários de aula e intervalo.
+     * Método implementado via TDD (Ciclos 1 a 4).
      * @return bool
+     */
+    public function validaHorarios()
+    {
+        // 1. Validação da Aula: Fim > Início
+        if ($this->hora_inicial && $this->hora_final) {
+            if (strtotime($this->hora_final) <= strtotime($this->hora_inicial)) {
+                $this->mensagem = 'A hora final deve ser maior que a inicial.';
+                return false;
+            }
+        }
+
+        // 2. Validação do Intervalo (se preenchido)
+        if ($this->hora_inicio_intervalo && $this->hora_fim_intervalo) {
+            $inicioAula = strtotime($this->hora_inicial);
+            $fimAula = strtotime($this->hora_final);
+            $inicioIntervalo = strtotime($this->hora_inicio_intervalo);
+            $fimIntervalo = strtotime($this->hora_fim_intervalo);
+
+            // Consistência Interna: Fim > Início
+            if ($fimIntervalo <= $inicioIntervalo) {
+                $this->mensagem = 'A hora final do intervalo deve ser maior que a inicial.';
+                return false;
+            }
+
+            // Consistência Externa: Dentro do período de aula
+            if ($inicioIntervalo < $inicioAula || $fimIntervalo > $fimAula) {
+                $this->mensagem = 'O intervalo deve estar dentro do horário da turma.';
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Cadastra o registro atual
+     * @return int|bool
      */
     public function cadastra()
     {
+        // Validação de Regras de Negócio (TDD)
+        if (!$this->validaHorarios()) {
+            return false;
+        }
+
+        // Lógica original de persistência (Legado)
         if (is_numeric($this->ref_usuario_cad) && is_string($this->nm_turma) && is_numeric($this->max_aluno) && is_numeric($this->multiseriada) && is_numeric($this->ref_cod_turma_tipo)) {
             $db = new clsBanco;
 
@@ -343,68 +399,57 @@ class clsPmieducarTurma extends Model
                 $valores .= "{$gruda}'{$this->ref_ref_cod_serie_mult}'";
                 $gruda = ', ';
             }
-
             if (is_bool($this->visivel)) {
                 $this->visivel = $this->visivel ? 'true' : 'false';
                 $campos .= "{$gruda}visivel";
                 $valores .= "{$gruda}'{$this->visivel}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->turma_turno_id)) {
                 $campos .= "{$gruda}turma_turno_id";
                 $valores .= "{$gruda}'{$this->turma_turno_id}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->tipo_boletim)) {
                 $campos .= "{$gruda}tipo_boletim";
                 $valores .= "{$gruda}'{$this->tipo_boletim}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->tipo_boletim_diferenciado)) {
                 $campos .= "{$gruda}tipo_boletim_diferenciado";
                 $valores .= "{$gruda}'{$this->tipo_boletim_diferenciado}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->ano)) {
                 $campos .= "{$gruda}ano";
                 $valores .= "{$gruda}'{$this->ano}'";
                 $gruda = ', ';
             }
-
             if (is_string($this->data_fechamento) && $this->data_fechamento != '') {
                 $campos .= "{$gruda}data_fechamento";
                 $valores .= "{$gruda}'{$this->data_fechamento}'";
                 $gruda = ', ';
             }
-
             if (is_array($this->tipo_atendimento)) {
                 $campos .= "{$gruda}tipo_atendimento";
                 $valores .= "{$gruda}'{" . implode(',', $this->tipo_atendimento) . "}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->cod_curso_profissional)) {
                 $campos .= "{$gruda}cod_curso_profissional";
                 $valores .= "{$gruda}'{$this->cod_curso_profissional}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->etapa_educacenso)) {
                 $campos .= "{$gruda}etapa_educacenso";
                 $valores .= "{$gruda}'{$this->etapa_educacenso}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->etapa_agregada)) {
                 $campos .= "{$gruda}etapa_agregada";
                 $valores .= "{$gruda}'{$this->etapa_agregada}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->ref_cod_disciplina_dispensada)) {
                 $campos .= "{$gruda}ref_cod_disciplina_dispensada";
                 $valores .= "{$gruda}'{$this->ref_cod_disciplina_dispensada}'";
@@ -414,96 +459,80 @@ class clsPmieducarTurma extends Model
                 $valores .= "{$gruda}null";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->nao_informar_educacenso)) {
                 $campos .= "{$gruda}nao_informar_educacenso";
                 $valores .= "{$gruda}'{$this->nao_informar_educacenso}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->tipo_mediacao_didatico_pedagogico)) {
                 $campos .= "{$gruda}tipo_mediacao_didatico_pedagogico";
                 $valores .= "{$gruda}'{$this->tipo_mediacao_didatico_pedagogico}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->local_funcionamento_diferenciado)) {
                 $campos .= "{$gruda}local_funcionamento_diferenciado";
                 $valores .= "{$gruda}'{$this->local_funcionamento_diferenciado}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->classe_especial)) {
                 $campos .= "{$gruda}classe_especial";
                 $valores .= "{$gruda}'{$this->classe_especial}'";
                 $gruda = ', ';
             }
-
             if (is_numeric($this->formacao_alternancia)) {
                 $campos .= "{$gruda}formacao_alternancia";
                 $valores .= "{$gruda}'{$this->formacao_alternancia}'";
                 $gruda = ', ';
             }
-
             if (is_string($this->dias_semana)) {
                 $campos .= "{$gruda}dias_semana";
                 $valores .= "{$gruda}'{$this->dias_semana}'";
                 $gruda = ', ';
             }
-
             if (is_string($this->atividades_complementares)) {
                 $campos .= "{$gruda}atividades_complementares";
                 $valores .= "{$gruda}'{$this->atividades_complementares}'";
                 $gruda = ', ';
             }
-
             if (is_string($this->atividades_aee)) {
                 $campos .= "{$gruda}atividades_aee";
                 $valores .= "{$gruda}'{$this->atividades_aee}'";
             }
-
             if (($this->hora_inicial_matutino)) {
                 $campos .= "{$gruda}hora_inicial_matutino";
                 $valores .= "{$gruda}'{$this->hora_inicial_matutino}'";
                 $gruda = ', ';
             }
-
             if (($this->hora_inicio_intervalo_matutino)) {
                 $campos .= "{$gruda}hora_inicio_intervalo_matutino";
                 $valores .= "{$gruda}'{$this->hora_inicio_intervalo_matutino}'";
                 $gruda = ', ';
             }
-
             if (($this->hora_fim_intervalo_matutino)) {
                 $campos .= "{$gruda}hora_fim_intervalo_matutino";
                 $valores .= "{$gruda}'{$this->hora_fim_intervalo_matutino}'";
                 $gruda = ', ';
             }
-
             if (($this->hora_final_matutino)) {
                 $campos .= "{$gruda}hora_final_matutino";
                 $valores .= "{$gruda}'{$this->hora_final_matutino}'";
                 $gruda = ', ';
             }
-
             if (($this->hora_inicial_vespertino)) {
                 $campos .= "{$gruda}hora_inicial_vespertino";
                 $valores .= "{$gruda}'{$this->hora_inicial_vespertino}'";
                 $gruda = ', ';
             }
-
             if (($this->hora_inicio_intervalo_vespertino)) {
                 $campos .= "{$gruda}hora_inicio_intervalo_vespertino";
                 $valores .= "{$gruda}'{$this->hora_inicio_intervalo_vespertino}'";
                 $gruda = ', ';
             }
-
             if (($this->hora_fim_intervalo_vespertino)) {
                 $campos .= "{$gruda}hora_fim_intervalo_vespertino";
                 $valores .= "{$gruda}'{$this->hora_fim_intervalo_vespertino}'";
                 $gruda = ', ';
             }
-
             if (($this->hora_final_vespertino)) {
                 $campos .= "{$gruda}hora_final_vespertino";
                 $valores .= "{$gruda}'{$this->hora_final_vespertino}'";
@@ -517,6 +546,7 @@ class clsPmieducarTurma extends Model
 
         return false;
     }
+}
 
     /**
      * Edita os dados de um registro
